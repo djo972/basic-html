@@ -1,7 +1,23 @@
 {
-  "name": "basic html",
+  "name": "basic-html",
   "version": "1.0.0",
-  "dependencies": {
-    "normalize.css": "^8.0.1"
+  "description": "\"# basic-html\"  \"# basic-html\"  \"# basic-html\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djo972/basic-html.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/djo972/basic-html/issues"
+  },
+  "homepage": "https://github.com/djo972/basic-html#readme",
+  "devDependencies": {
+    "grunt": "^1.0.4",
+    "grunt-contrib-sass": "^1.0.0"
   }
 }
