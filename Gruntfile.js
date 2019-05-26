@@ -19,7 +19,7 @@ module.exports = function(grunt) {
                     },
                 ],
             },
-            prod: {
+            dist: {
                 // Nom de la sous-tâche
                 options: {
                     // Options
@@ -37,13 +37,33 @@ module.exports = function(grunt) {
                 ],
             },
         },
+        concat: {
+            options: {
+                separator: ";", // permet d'ajouter un point-virgule entre chaque fichier concaténé.
+            },
+            dist: {
+                src: ["src/js/main.js","src/js/extra.js"], // la source
+                dest: "dist/js/built.js", // la destination finale
+            },
+        },
+        uglify: {
+            options: {
+                separator: ";",
+            },
+            dist: {
+                src: ["src/js/main.js","src/js/extra.js"], // la source
+                dest: "dist/js/built.js", // la destination finale
+            },
+        },
     });
 
     // Import du package
     grunt.loadNpmTasks("grunt-contrib-sass");
+    grunt.loadNpmTasks("grunt-contrib-concat");
+    grunt.loadNpmTasks("grunt-contrib-uglify");
 
     // Redéfinition de la tâche `default` qui est la tâche lancée dès que vous lancez Grunt sans rien spécifier.
     // Note : ici, nous définissons sass comme une tâche à lancer si on lance la tâche `default`.
-    grunt.registerTask("default",["sass:prod"]);
-    grunt.registerTask("dev",["sass:dev"]);
+    grunt.registerTask("default",["sass:dist","concat:dist","uglify:dist"]);
+    grunt.registerTask("dev",["sass:dev","concat:dist"]);
 };
