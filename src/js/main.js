@@ -1,7 +1,7 @@
 function App() {
     const conf = {
         el: 'canvas',
-        fov: 50,
+        fov: 500,
         cameraZ: 4090,
     };
 
