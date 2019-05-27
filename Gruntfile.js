@@ -45,12 +45,20 @@ module.exports = function(grunt) {
         },
         concat: {
             options: {
-                separator: ";", // permet d'ajouter un point-virgule entre chaque fichier concaténé.
+                separator: " ", // permet d'ajouter un point-virgule entre chaque fichier concaténé.
             },
             dist: {
                 src: ["src/js/main.js","src/js/extra.js"], // la source
                 dest: "dist/js/built.js", // la destination finale
             },
+        },
+        jshint: {
+            beforeconcat: ["src/js/main.js","src/js/extra.js"],
+            afterconcat: ["dist/js/built.js"],
+            options: {
+                reporter: require('jshint-stylish'),
+                esversion: 6
+            }
         },
         babel: {
             options: {
@@ -76,8 +84,7 @@ module.exports = function(grunt) {
                 options:{
                     port: 9000,
                     hostname: 'localhost',
-                    livereload: 35729,
-                    // base: 'http://localhost/src/'
+                    livereload: 35729
                 }
             }
         },
@@ -104,10 +111,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks("grunt-contrib-watch");
     grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
 
     // Redéfinition de la tâche `default` qui est la tâche lancée dès que vous lancez Grunt sans rien spécifier.
     // Note : ici, nous définissons sass comme une tâche à lancer si on lance la tâche `default`.
-    grunt.registerTask("default",["clean","sass:dist","concat:dist","babel","uglify"]);
+    grunt.registerTask("default",["clean","sass:dist","jshint:beforeconcat","concat:dist","babel","uglify","jshint:afterconcat"]);
     grunt.registerTask("dev",["sass:dev","concat:dist"]);
     // Start web server
     grunt.registerTask('serve', ['connect:all','watch']);

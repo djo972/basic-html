@@ -2,7 +2,7 @@ function App() {
     const conf = {
         el: 'canvas',
         fov: 50,
-        cameraZ: 400,
+        cameraZ: 4090,
     };
 
     const { WebGLRenderer, PerspectiveCamera, OrbitControls, AmbientLight, DirectionalLight, Scene } = THREE;
@@ -264,8 +264,8 @@ function getFibonacciSpherePoints(samples, radius, randomize) {
     if (randomize) {
         random = Math.random() * samples;
     }
-    let points = []
-    let offset = 2 / samples
+    let points = [];
+    let offset = 2 / samples;
     let increment = Math.PI * (3 - Math.sqrt(5));
     for (let i = 0; i < samples; i++) {
         let y = ((i * offset) - 1) + (offset / 2);
