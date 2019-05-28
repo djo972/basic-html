@@ -1,4 +1,16 @@
 module.exports = function(grunt) {
+    // Import
+    grunt.loadNpmTasks("grunt-contrib-sass");
+    grunt.loadNpmTasks("grunt-contrib-concat");
+    grunt.loadNpmTasks("grunt-contrib-uglify");
+    grunt.loadNpmTasks("grunt-contrib-clean");
+    grunt.loadNpmTasks('grunt-babel');
+    grunt.loadNpmTasks("grunt-contrib-watch");
+    grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-htmlmin');
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         clean: {
@@ -38,10 +50,41 @@ module.exports = function(grunt) {
                         cwd: "src/styles/",
                         src: ["main.scss"],
                         dest: "dist/styles/",
-                        ext: ".css",
+                        ext: ".min.css",
                     },
                 ],
             },
+        },
+        cssmin: {
+            options: {
+                mergeIntoShorthands: false,
+                roundingPrecision: -1
+            },
+            target: {
+                files: {
+                    // 'output.css': ['foo.css', 'bar.css']
+                }
+            }
+        },
+        htmlmin: {                                     // Task
+            dist: {                                      // Target
+                options: {                                 // Target options
+                    removeComments: true,
+                    collapseWhitespace: true
+                },
+                files: {                                   // Dictionary of files
+                    'dist/index.html': 'src/index.html',     // 'destination': 'source'
+                    'dist/contact.html': 'src/contact.html'
+                }
+            },
+            dev: {                                       // Another target
+                files: [{
+                    expand: true,
+                    cwd: 'app',
+                    src: ['src/**/*.html', '*.html'],
+                    dest: 'dist'
+                }]
+            }
         },
         concat: {
             options: {
@@ -72,11 +115,11 @@ module.exports = function(grunt) {
         },
         uglify: {
             options: {
-                separator: ";",
+                banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             dist: {
                 src: ["dist/js/app.js"], // la source
-                dest: "dist/js/app.min.js", // la destination finale
+                dest: "dist/js/<%= grunt.template.today(\"yyyy-mm-dd\") %>.min.js", // la destination finale
             },
         },
         connect: {
@@ -103,15 +146,7 @@ module.exports = function(grunt) {
         }
     });
 
-    // Import du package
-    grunt.loadNpmTasks("grunt-contrib-sass");
-    grunt.loadNpmTasks("grunt-contrib-concat");
-    grunt.loadNpmTasks("grunt-contrib-uglify");
-    grunt.loadNpmTasks("grunt-contrib-clean");
-    grunt.loadNpmTasks('grunt-babel');
-    grunt.loadNpmTasks("grunt-contrib-watch");
-    grunt.loadNpmTasks('grunt-contrib-connect');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
+
 
     // Redéfinition de la tâche `default` qui est la tâche lancée dès que vous lancez Grunt sans rien spécifier.
     // Note : ici, nous définissons sass comme une tâche à lancer si on lance la tâche `default`.
