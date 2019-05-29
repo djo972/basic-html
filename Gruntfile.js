@@ -146,8 +146,6 @@ module.exports = function(grunt) {
         }
     });
 
-
-
     // Redéfinition de la tâche `default` qui est la tâche lancée dès que vous lancez Grunt sans rien spécifier.
     // Note : ici, nous définissons sass comme une tâche à lancer si on lance la tâche `default`.
     grunt.registerTask("default",["clean","sass:dist","jshint:beforeconcat","concat:dist","babel","uglify","jshint:afterconcat"]);
