@@ -2,7 +2,7 @@
      const
          a = $(this).scrollTop(),
          b = 500,
-         t = window.pageYOffset;
+         te = window.pageYOffset;
 
      $(".parallax").css('transform', 'translate(-' + a / 1.6 + 'px, -' + 1 - a / b + 'px)');
 

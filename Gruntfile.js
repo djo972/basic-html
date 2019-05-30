@@ -10,13 +10,35 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
+    grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-text-replace');
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
+            '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
+            '* http://<%= pkg.homepage %>/\n' +
+            '* Copyright (c) <%= grunt.template.today("yyyy") %> ' +
+            '<%= pkg.author.name %>; Licensed MIT */',
         clean: {
             build: {
                 src: ['dist/*']
             }
+        },
+        copy: {
+            images: {
+                expand:     true,
+                cwd:        'src/images',
+                src:        ['**/*'],
+                dest:       'dist/images/',
+            },
+            files: {
+                expand:     true,
+                cwd:        './',
+                src:        ['*.html'],
+                dest:       'dist/',
+            },
+
         },
         sass: {
             // Nom de la tâche
@@ -56,6 +78,7 @@ module.exports = function(grunt) {
             },
         },
         cssmin: {
+            // dans le cas ou plusieurs fichiers sont present
             options: {
                 mergeIntoShorthands: false,
                 roundingPrecision: -1
@@ -72,10 +95,12 @@ module.exports = function(grunt) {
                     removeComments: true,
                     collapseWhitespace: true
                 },
-                files: {                                   // Dictionary of files
-                    'dist/index.html': 'src/index.html',     // 'destination': 'source'
-                    'dist/contact.html': 'src/contact.html'
-                }
+                files: [{
+                    expand: true,
+                    cwd: 'dist/',
+                    src: ['*.html'],
+                    dest: 'dist'
+                }]
             },
             dev: {                                       // Another target
                 files: [{
@@ -115,13 +140,27 @@ module.exports = function(grunt) {
         },
         uglify: {
             options: {
-                banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner: '<%= banner %>'
             },
             dist: {
                 src: ["dist/js/app.js"], // la source
-                dest: "dist/js/<%= grunt.template.today(\"yyyy-mm-dd\") %>.min.js", // la destination finale
+                dest: "dist/js/main<%= pkg.version %>_<%= grunt.template.today(\"yyyy-mm-dd\") %>.min.js", // la destination finale
             },
         },
+        replace: {
+            dist: {
+                src: ['dist/*.html'],
+                overwrite: true,
+                replacements: [{
+                    from: "dist/css/bootstrap.css",
+                    to: "css/bootstrap.min.css"
+                }, {
+                    from: "dist/js/main.js",
+                    to: "js/main<%= pkg.version %>_<%= grunt.template.today(\"yyyy-mm-dd\") %>.min.js"
+                }]
+            }
+        },
+
         connect: {
             all: {
                 options:{
@@ -135,20 +174,31 @@ module.exports = function(grunt) {
             options: {
                 livereload: 35729
             },
+            images: {
+                files: 'src/images/**',
+                tasks: ['copy:images'],
+            },
             scripts: {
                 files: '**/*.js', // tous les fichiers JavaScript de n'importe quel dossier
-                tasks: ['clean']
+                tasks: ['dist-js']
             },
             styles: {
                 files: '**/*.scss', // tous les fichiers Sass de n'importe quel dossier
-                tasks: ['clean']
+                tasks: ['']
             }
         }
     });
 
     // Redéfinition de la tâche `default` qui est la tâche lancée dès que vous lancez Grunt sans rien spécifier.
     // Note : ici, nous définissons sass comme une tâche à lancer si on lance la tâche `default`.
-    grunt.registerTask("default",["clean","sass:dist","jshint:beforeconcat","concat:dist","babel","uglify","jshint:afterconcat"]);
+
+    // child
+    grunt.registerTask("duplicate",["copy:images","copy:files"]);
+    grunt.registerTask("dist-js",["jshint:beforeconcat","concat:dist","babel","uglify","jshint:afterconcat"]);
+
+    // prod
+    grunt.registerTask("default",["clean","sass:dist","dist-js","duplicate","htmlmin:dist","replace:dist"]);
+    // dev
     grunt.registerTask("dev",["sass:dev","concat:dist"]);
     // Start web server
     grunt.registerTask('serve', ['connect:all','watch']);
