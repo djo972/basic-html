@@ -12,6 +12,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-text-replace');
+    grunt.loadNpmTasks('grunt-notify');
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -23,6 +24,12 @@ module.exports = function(grunt) {
         clean: {
             build: {
                 src: ['dist/*']
+            },
+            css:{
+                src:['dist/js/*']
+            },
+            js:{
+                src:['dist/styles/*']
             }
         },
         copy: {
@@ -38,14 +45,12 @@ module.exports = function(grunt) {
                 src:        ['*.html'],
                 dest:       'dist/',
             },
-
         },
         sass: {
             // Nom de la tâche
             dev: {
                 // Nom de la sous-tâche
                 options: {
-                    // Options
                     style: "expanded",
                 },
                 files: [
@@ -55,7 +60,7 @@ module.exports = function(grunt) {
                         cwd: "src/styles/",
                         src: ["main.scss"],
                         dest: "dist/styles/",
-                        ext: ".css",
+                        ext: "<%= pkg.name %><%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.css",
                     },
                 ],
             },
@@ -72,7 +77,7 @@ module.exports = function(grunt) {
                         cwd: "src/styles/",
                         src: ["main.scss"],
                         dest: "dist/styles/",
-                        ext: ".min.css",
+                        ext: "<%= pkg.name %><%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.min.css",
                     },
                 ],
             },
@@ -111,22 +116,22 @@ module.exports = function(grunt) {
                 }]
             }
         },
-        concat: {
-            options: {
-                separator: " ", // permet d'ajouter un point-virgule entre chaque fichier concaténé.
-            },
-            dist: {
-                src: ["src/js/main.js","src/js/extra.js"], // la source
-                dest: "dist/js/built.js", // la destination finale
-            },
-        },
         jshint: {
-            beforeconcat: ["src/js/main.js","src/js/extra.js"],
-            afterconcat: ["dist/js/built.js"],
+            beforeconcat: ["src/js/*.js"],
+            afterconcat: ["dist/js/app<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.min.js"],
             options: {
                 reporter: require('jshint-stylish'),
-                esversion: 6
+                esversion: 6,
             }
+        },
+        concat: {
+            options: {
+                sourceMap:true,
+            },
+            dist: {
+                src: ["src/js/*.js"], // la source
+                dest: "dist/js/appCC<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.js", // la destination finale
+            },
         },
         babel: {
             options: {
@@ -134,33 +139,44 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: {
-                    "dist/js/app.js": "dist/js/built.js"
+                    "dist/js/appBuilt<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.js":"dist/js/appCC<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.js"
                 }
             }
         },
         uglify: {
             options: {
-                banner: '<%= banner %>'
+                banner: '<%= banner %>',
+                sourceMap: true
             },
             dist: {
-                src: ["dist/js/app.js"], // la source
-                dest: "dist/js/main<%= pkg.version %>_<%= grunt.template.today(\"yyyy-mm-dd\") %>.min.js", // la destination finale
+                src: ["dist/js/appBuilt<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.js"], // la source
+                dest: "dist/js/app<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.min.js", // la destination finale
             },
         },
         replace: {
+            dev:{
+                src: ['*.html'],
+                overwrite: true,
+                replacements: [{
+                    from: /dist(.*)css/g,
+                    to: "dist/styles/main<%= pkg.name %><%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.css"
+                }, {
+                    from: /dist(.*)js/g,
+                    to: "dist/js/appCC<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.js"
+                }]
+            },
             dist: {
                 src: ['dist/*.html'],
                 overwrite: true,
                 replacements: [{
-                    from: "dist/css/bootstrap.css",
-                    to: "css/bootstrap.min.css"
+                    from: /dist(.*)css/g,
+                    to: "styles/<%= pkg.name %><%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.min.css"
                 }, {
-                    from: "dist/js/main.js",
-                    to: "js/main<%= pkg.version %>_<%= grunt.template.today(\"yyyy-mm-dd\") %>.min.js"
+                    from: /dist(.*)js/g,
+                    to: "js/app<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.min.js"
                 }]
             }
         },
-
         connect: {
             all: {
                 options:{
@@ -180,26 +196,57 @@ module.exports = function(grunt) {
             },
             scripts: {
                 files: '**/*.js', // tous les fichiers JavaScript de n'importe quel dossier
-                tasks: ['dist-js']
+                tasks: ['dev-js','replace:dev','notify:js']
             },
             styles: {
                 files: '**/*.scss', // tous les fichiers Sass de n'importe quel dossier
-                tasks: ['']
+                tasks: ['sass:dev','replace:dev','notify:css']
+            },
+            files: {
+                files: '**/*.html', // tous les fichiers Sass de n'importe quel dossier
+                tasks: []
+            }
+        },
+        notify: {
+            js: {
+                options: {
+                    title: 'Task Complete',  // optional
+                    message: 'jsfinished running', //required
+                }
+            },
+            css: {
+                options: {
+                    title: 'Task Complete',  // optional
+                    message: 'SASS finished runnin', //required
+                }
+            },
+            watch: {
+                options: {
+                    title: 'Task Complete',  // optional
+                    message: 'SASS and Uglify finished running', //required
+                }
+            },
+            server: {
+                options: {
+                    message: 'Server is ready!'
+                }
             }
         }
-    });
-
+});
     // Redéfinition de la tâche `default` qui est la tâche lancée dès que vous lancez Grunt sans rien spécifier.
     // Note : ici, nous définissons sass comme une tâche à lancer si on lance la tâche `default`.
 
     // child
     grunt.registerTask("duplicate",["copy:images","copy:files"]);
-    grunt.registerTask("dist-js",["jshint:beforeconcat","concat:dist","babel","uglify","jshint:afterconcat"]);
+    grunt.registerTask("dist-js",["jshint:beforeconcat","concat:dist","babel","jshint:afterconcat","uglify",'notify:js']);
+    grunt.registerTask("dev-js",["jshint:beforeconcat","concat:dist"]);
+    grunt.registerTask("dev-sass",["sass:dev","replace:dev"]);
+    grunt.registerTask("prebuild",["dev-js","dev-sass"]);
 
     // prod
-    grunt.registerTask("default",["clean","sass:dist","dist-js","duplicate","htmlmin:dist","replace:dist"]);
+    grunt.registerTask("default",["clean:build","sass:dist","dist-js","duplicate","htmlmin:dist","replace:dist"]);
     // dev
     grunt.registerTask("dev",["sass:dev","concat:dist"]);
     // Start web server
-    grunt.registerTask('serve', ['connect:all','watch']);
+    grunt.registerTask('serve', ['connect:all','notify:server','prebuild','watch']);
 };
