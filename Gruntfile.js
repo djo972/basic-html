@@ -255,14 +255,14 @@ module.exports = function(grunt) {
     grunt.registerTask("dist-js",["jshint:beforeconcat","concat:dist","babel","jshint:afterconcat","uglify",'notify:js']);
     grunt.registerTask("dev-js",["jshint:beforeconcat","concat:dist"]);
     grunt.registerTask("dev-sass",["sass:dev","replace:dev"]);
-    grunt.registerTask("prebuild",["dev-js","dev-sass"]);
+    grunt.registerTask("prebuild",["dev-js","dev-sass","copy:images"]);
 
     // prod
     grunt.registerTask("default",["clean:build","sass:dist","dist-js","duplicate","htmlmin:dist","replace:dist"]);
     // dev
     grunt.registerTask("dev",["sass:dev","concat:dist"]);
     // Start web server
-    grunt.registerTask('serve', ['connect:all','notify:server','prebuild','watch']);
+    grunt.registerTask('serve', ['clean','connect:all','notify:server','prebuild','watch']);
     // Unit Test
     grunt.registerTask('test',['mochaTest'])
 };
