@@ -184,10 +184,10 @@ module.exports = function(grunt) {
                 overwrite: true,
                 replacements: [{
                     from: /dist(.*)css/g,
-                    to: "styles/<%= pkg.name %><%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.min.css"
+                    to: "styles/style_ver=<%= pkg.version %>.min.css"
                 }, {
                     from: /dist(.*)js/g,
-                    to: "js/app<%= pkg.version %>_<%= grunt.template.today('yyyy-mm-dd') %>.min.js"
+                    to: "js/app_ver=<%= pkg.version %>.min.js"
                 }]
             }
         },
