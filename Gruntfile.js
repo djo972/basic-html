@@ -188,6 +188,9 @@ module.exports = function(grunt) {
                 }, {
                     from: /dist(.*)js/g,
                     to: "js/app_ver=<%= pkg.version %>.min.js"
+                },{
+                    from: /dist\//g,
+                    to: ""
                 }]
             }
         },
@@ -264,5 +267,5 @@ module.exports = function(grunt) {
     // Start web server
     grunt.registerTask('serve', ['clean','connect:all','notify:server','prebuild','watch']);
     // Unit Test
-    grunt.registerTask('test',['mochaTest'])
+    grunt.registerTask('test',['mochaTest']);
 };
